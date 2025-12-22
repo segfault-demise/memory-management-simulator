@@ -1,39 +1,40 @@
 #include <iostream>
-#include <string>
 #include "memory/PhysicalMemory.h"
-
-void testStrategy(AllocationStrategy strategy, const std::string& name) {
-
-    std::cout << "\n========== " << name << " ==========\n";
-
-    PhysicalMemory memory(1000, strategy);
-
-    int a = memory.allocate(100);
-    int b = memory.allocate(300);
-    int c = memory.allocate(200);
-
-    memory.freeBlock(b);
-
-    memory.allocate(250);
-
-    memory.dumpMemory();
-
-    std::cout << "\nMetrics:\n";
-    std::cout << "Total Free Memory: " << memory.getTotalFreeMemory() << "\n";
-    std::cout << "Largest Free Block: " << memory.getLargestFreeBlock() << "\n";
-    std::cout << "External Fragmentation: " 
-              << memory.getExternalFragmentation() << "\n";
-    std::cout << "Memory Utilization: " 
-              << memory.getMemoryUtilization() << "\n";
-    std::cout << "Allocation Success Rate: " 
-              << memory.getAllocationSuccessRate() << "\n";
-}
+#include "cache/Cache.h"
 
 int main() {
 
-    testStrategy(FIRST_FIT, "FIRST FIT");
-    testStrategy(BEST_FIT, "BEST FIT");
-    testStrategy(WORST_FIT, "WORST FIT");
+    PhysicalMemory memory(1000, FIRST_FIT);
+
+    // Cache with 3 lines
+    Cache cache(3);
+
+    // Simulated memory accesses
+    int a = memory.allocate(100);  // address 0
+    int b = memory.allocate(200);  // address 100
+    int c = memory.allocate(150);  // address 300
+    int d = memory.allocate(100);  // address 450
+
+    int blockSize = 100;
+
+    // Access pattern
+    cache.access(a / blockSize);
+    cache.printCache();
+    cache.access(b / blockSize);
+    cache.printCache();
+    cache.access(c / blockSize);
+    cache.printCache();
+    cache.access(a / blockSize);  // hit
+    cache.printCache();
+    cache.access(d / blockSize);  // eviction
+    cache.printCache();
+    cache.access(b / blockSize);  // may be miss
+
+    cache.printCache();
+
+    std::cout << "Cache Hits: " << cache.getHits() << "\n";
+    std::cout << "Cache Misses: " << cache.getMisses() << "\n";
+    std::cout << "Hit Ratio: " << cache.getHitRatio() << "\n";
 
     return 0;
 }
