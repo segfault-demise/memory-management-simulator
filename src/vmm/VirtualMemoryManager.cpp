@@ -1,18 +1,16 @@
-#include "vmm/VirtualMemoryManager.h"
+#include "../../include/vmm/VirtualMemoryManager.h"
 #include <iostream>
+
+using namespace std;
 
 VirtualMemoryManager::VirtualMemoryManager(int pageSize,
                                            int numVirtualPages,
-                                           int numPhysicalFrames)
-{
+                                           int numPhysicalFrames) {
     this->pageSize = pageSize;
     this->numVirtualPages = numVirtualPages;
     this->numPhysicalFrames = numPhysicalFrames;
 
     pageTable.resize(numVirtualPages);
-    for (int i = 0; i < numVirtualPages; i++) {
-        pageTable[i].valid = false;
-    }
 
     frameToPage.resize(numPhysicalFrames, -1);
 
@@ -20,8 +18,8 @@ VirtualMemoryManager::VirtualMemoryManager(int pageSize,
     memoryAccesses = 0;
 }
 
+// Handle page fault using LRU replacement
 void VirtualMemoryManager::handlePageFault(int pageNumber) {
-
     pageFaults++;
 
     int frame = -1;
@@ -34,28 +32,26 @@ void VirtualMemoryManager::handlePageFault(int pageNumber) {
         }
     }
 
-    // Case 2: No free frame → evict LRU page
+    // Case 2: No free frame -> evict LRU page
     if (frame == -1) {
         int victimPage = lruPages.back();
         lruPages.pop_back();
 
         frame = pageTable[victimPage].frameNumber;
-
         pageTable[victimPage].valid = false;
     }
 
-    // Load new page into frame
+    // Load new page
     pageTable[pageNumber].frameNumber = frame;
     pageTable[pageNumber].valid = true;
-
     frameToPage[frame] = pageNumber;
 
     // Update LRU
     lruPages.push_front(pageNumber);
 }
 
+// Translate virtual address to physical address
 int VirtualMemoryManager::translate(int virtualAddress) {
-
     memoryAccesses++;
 
     int pageNumber = virtualAddress / pageSize;
@@ -65,14 +61,12 @@ int VirtualMemoryManager::translate(int virtualAddress) {
         handlePageFault(pageNumber);
     }
 
-    // Update LRU (page was just used)
+    // Update LRU (page just accessed)
     lruPages.remove(pageNumber);
     lruPages.push_front(pageNumber);
 
     int frame = pageTable[pageNumber].frameNumber;
-    int physicalAddress = frame * pageSize + offset;
-
-    return physicalAddress;
+    return frame * pageSize + offset;
 }
 
 int VirtualMemoryManager::getPageFaults() const {
@@ -84,6 +78,7 @@ int VirtualMemoryManager::getMemoryAccesses() const {
 }
 
 double VirtualMemoryManager::getPageFaultRate() const {
-    if (memoryAccesses == 0) return 0.0;
+    if (memoryAccesses == 0)
+        return 0.0;
     return (double)pageFaults / memoryAccesses;
 }

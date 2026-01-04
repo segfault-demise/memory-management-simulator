@@ -4,6 +4,8 @@
 #include <vector>
 #include <list>
 
+using namespace std;
+
 class SetAssociativeCache {
 private:
     int totalBlocks;
@@ -11,26 +13,20 @@ private:
     int associativity;
     int numberOfSets;
 
-    // Each set has its own LRU list
-    std::vector<std::list<int>> sets;
-
     int hits;
     int misses;
 
+    // Each set maintains blocks in MRU -> LRU order
+    vector< list<int> > sets;
+
 public:
-    SetAssociativeCache(int totalBlocks,int blockSize,int associativity);
+    SetAssociativeCache(int totalBlocks,
+                        int blockSize,
+                        int associativity);
 
-    //  Pure check
-    bool contains(int address) const;
+    // Access a memory address, returns true if HIT
+    bool access(int address);
 
-    //  Accounting
-    void recordHit();
-    void recordMiss();
-
-    //  Structural update
-    void touch(int address);
-
-    // Metrics
     int getHits() const;
     int getMisses() const;
     double getHitRatio() const;

@@ -1,59 +1,62 @@
 #include <iostream>
-#include "vmm/VirtualMemoryManager.h"
-#include "cache/SetAssociativeCache.h"
+#include "include/vmm/VirtualMemoryManager.h"
+#include "include/cache/SetAssociativeCache.h"
+
+using namespace std;
 
 int main() {
-
-    // Stage 6: Virtual Memory
-    VirtualMemoryManager vmm(
-        100,   // page size
-        10,    // virtual pages
-        4      // physical frames
+    // -------- Virtual Memory Configuration --------
+    VirtualMemoryManager vmm(64,  // page size (bytes)
+                             16,  // number of virtual pages
+                             6    // number of physical frames
     );
 
-    // Stage 5: Cache (physical-address based)
-    SetAssociativeCache L1(4, 100, 2);  // 4 blocks, 2-way
-    SetAssociativeCache L2(8, 100, 4);  // 8 blocks, 4-way
+    // -------- Cache Hierarchy --------
+    // L1 Cache: smaller, faster
+    SetAssociativeCache L1(6,   // total blocks
+                           64,  // block size
+                           2    // 2-way set associative
+    );
 
-    int virtualAddresses[] = {
-        10, 120, 250, 330,
-        410, 120, 10, 250
-    };
+    // L2 Cache: larger, slower
+    SetAssociativeCache L2(12,  // total blocks
+                           64,  // block size
+                           3    // 3-way set associative
+    );
 
-    for (int va : virtualAddresses) {
+    // Virtual address trace
+    int virtualAddresses[] = {20, 80,  140, 220, 20,  300,
+                              80, 400, 140, 20,  500, 300};
 
-        //  Virtual → Physical
+    int n = sizeof(virtualAddresses) / sizeof(int);
+
+    for (int i = 0; i < n; i++) {
+        int va = virtualAddresses[i];
+
+        // Virtual -> Physical address translation
         int pa = vmm.translate(va);
 
-        //  Cache hierarchy
-        if (L1.contains(pa)) {
-            L1.recordHit();
-            L1.touch(pa);
-        }
-        else {
-            L1.recordMiss();
+        // -------- Cache Access --------
+        bool hitL1 = L1.access(pa);
 
-            if (L2.contains(pa)) {
-                L2.recordHit();
-                L2.touch(pa);
-                L1.touch(pa);   // promote
-            }
-            else {
-                L2.recordMiss();
-                L2.touch(pa);
-                L1.touch(pa);
-            }
+        if (!hitL1) {
+            bool hitL2 = L2.access(pa);
+
+            // Promote to L1 on L2 hit or miss
+            L1.access(pa);
         }
 
-        std::cout << "VA " << va << " -> PA " << pa << "\n";
+        cout << "VA " << va << " -> PA " << pa << endl;
     }
 
-    std::cout << "\n Metrics \n";
-    std::cout << "Page Faults: " << vmm.getPageFaults() << "\n";
-    std::cout << "Page Fault Rate: " << vmm.getPageFaultRate() << "\n";
+    // -------- Metrics --------
+    cout << "\n--- Metrics ---\n";
 
-    std::cout << "\nL1 Hit Ratio: " << L1.getHitRatio() << "\n";
-    std::cout << "L2 Hit Ratio: " << L2.getHitRatio() << "\n";
+    cout << "Page Faults: " << vmm.getPageFaults() << endl;
+    cout << "Page Fault Rate: " << vmm.getPageFaultRate() << endl;
+
+    cout << "\nL1 Hit Ratio: " << L1.getHitRatio() << endl;
+    cout << "L2 Hit Ratio: " << L2.getHitRatio() << endl;
 
     return 0;
 }

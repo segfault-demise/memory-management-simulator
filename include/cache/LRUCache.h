@@ -2,32 +2,25 @@
 #define LRU_CACHE_H
 
 #include <list>
+#include <unordered_map>
+
+using namespace std;
 
 class LRUCache {
 private:
     int capacity;
-    std::list<int> cache;   // front = MRU, back = LRU
-
     int hits;
     int misses;
 
+    list<int> order;   // MRU at front
+    unordered_map<int, list<int>::iterator> pos;
+
 public:
-    LRUCache(int capacity);
+    LRUCache(int cap);
 
-    //  Pure check (NO mutation, NO stats)
-    bool contains(int blockNumber) const;
+    // Access block: returns true if HIT
+    bool access(int blockNumber);
 
-    //  Accounting only
-    void recordHit();
-    void recordMiss();
-
-    //  Structural update (insert / promote)
-    void touch(int blockNumber);
-
-    // Inclusion support
-    void remove(int blockNumber);
-
-    // Metrics
     int getHits() const;
     int getMisses() const;
     double getHitRatio() const;

@@ -4,27 +4,29 @@
 #include <vector>
 #include <list>
 
+using namespace std;
+
+struct PageTableEntry {
+    bool valid;
+    int frameNumber;
+
+    PageTableEntry() {
+        valid = false;
+        frameNumber = -1;
+    }
+};
+
 class VirtualMemoryManager {
 private:
     int pageSize;
     int numVirtualPages;
     int numPhysicalFrames;
 
-    // Page table
-    struct PageTableEntry {
-        int frameNumber;
-        bool valid;
-    };
+    vector<PageTableEntry> pageTable;
+    vector<int> frameToPage;
 
-    std::vector<PageTableEntry> pageTable;
+    list<int> lruPages;   // MRU at front, LRU at back
 
-    // Frame table
-    std::vector<int> frameToPage;
-
-    // LRU metadata (pages in RAM)
-    std::list<int> lruPages;
-
-    // Metrics
     int pageFaults;
     int memoryAccesses;
 
@@ -35,10 +37,8 @@ public:
                          int numVirtualPages,
                          int numPhysicalFrames);
 
-    // Translate virtual → physical
     int translate(int virtualAddress);
 
-    // Metrics
     int getPageFaults() const;
     int getMemoryAccesses() const;
     double getPageFaultRate() const;

@@ -1,5 +1,20 @@
-# Ignore compiled executables
+# Compiled binaries
 *.exe
+*.out
+a.out
 
-# Ignore VS Code settings (optional)
+# Object files
+*.o
+
+# Build directories
+build/
+bin/
+
+# Logs
+*.log
+
+# VS Code settings
 .vscode/
+
+# OS generated files
+.DS_Store
