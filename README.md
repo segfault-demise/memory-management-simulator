@@ -8,9 +8,9 @@ A C++-based simulator that models how an operating system manages memory, includ
 
 ### Physical Memory Management
 - Simulates contiguous physical memory
-- Dynamic allocation using First Fit, Best Fit, and Worst Fit
+- Dynamic allocation using First Fit, Best Fit, and Worst Fit strategies
 - Block splitting and coalescing on allocation and deallocation
-- Tracks memory utilization, external fragmentation, and allocation success rate
+- Tracks memory utilization and external fragmentation
 
 ### Cache Simulation
 - FIFO Cache
@@ -33,7 +33,7 @@ A C++-based simulator that models how an operating system manages memory, includ
 ```
 include/
   ├── cache/
-  │   ├── FIFOCache.h
+  │   ├── fifo_cache.h
   │   ├── LRUCache.h
   │   └── SetAssociativeCache.h
   │
@@ -45,7 +45,7 @@ include/
 
 src/
   ├── cache/
-  │   ├── FIFOCache.cpp
+  │   ├── fifo_cache.cpp
   │   ├── LRUCache.cpp
   │   └── SetAssociativeCache.cpp
   │
@@ -54,9 +54,6 @@ src/
   │
   └── vmm/
       └── VirtualMemoryManager.cpp
-
-tests/
-  └── (test files)
 
 main.cpp
 README.md
@@ -85,9 +82,9 @@ Virtual Address → Page Table → Physical Address → L1 Cache → L2 Cache �
 ### Compile
 ```bash
 g++ main.cpp \
-    src/cache/SetAssociativeCache.cpp \
+    src/cache/fifo_cache.cpp \
     src/cache/LRUCache.cpp \
-    src/cache/FIFOCache.cpp \
+    src/cache/SetAssociativeCache.cpp \
     src/memory/PhysicalMemory.cpp \
     src/vmm/VirtualMemoryManager.cpp \
     -Iinclude \
@@ -106,7 +103,6 @@ g++ main.cpp \
 - L1 and L2 cache hit ratios
 - Memory utilization
 - External fragmentation
-- Allocation success rate
 
 ---
 
