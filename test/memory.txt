@@ -1,0 +1,79 @@
+I have added the detailed and interactive part of the input and output of the allocation part which includes the allocation strategy and the allocation and deallocation of the memory.
+
+
+--------------------------------
+STEP 1 TO 4 : MEMORY ALLOCATION
+--------------------------------
+Enter total memory size: 1000
+Enter allocation strategy (FIRST_FIT / BEST_FIT / WORST_FIT): FIRST_FIT
+Enter number of operations: 7
+Enter operations (malloc <size> / free <address>):
+malloc 300
+malloc(300) -> address 0
+Memory Layout:
+[Start: 0, Size: 300, Allocated]
+[Start: 300, Size: 700, Free]
+External Fragmentation: 0
+Memory Utilization: 0.3
+
+malloc 200
+malloc(200) -> address 300
+Memory Layout:
+[Start: 0, Size: 300, Allocated]
+[Start: 300, Size: 200, Allocated]
+[Start: 500, Size: 500, Free]
+External Fragmentation: 0
+Memory Utilization: 0.5
+
+malloc 400
+malloc(400) -> address 500
+Memory Layout:
+[Start: 0, Size: 300, Allocated]
+[Start: 300, Size: 200, Allocated]
+[Start: 500, Size: 400, Allocated]
+[Start: 900, Size: 100, Free]
+External Fragmentation: 0
+Memory Utilization: 0.9
+
+free 300
+free(300)
+Memory Layout:
+[Start: 0, Size: 300, Allocated]
+[Start: 300, Size: 200, Free]
+[Start: 500, Size: 400, Allocated]
+[Start: 900, Size: 100, Free]
+External Fragmentation: 0.333333
+Memory Utilization: 0.7
+
+malloc 150
+malloc(150) -> address 300
+Memory Layout:
+[Start: 0, Size: 300, Allocated]
+[Start: 300, Size: 150, Allocated]
+[Start: 450, Size: 50, Free]
+[Start: 500, Size: 400, Allocated]
+[Start: 900, Size: 100, Free]
+External Fragmentation: 0.333333
+Memory Utilization: 0.85
+
+malloc 250
+malloc(250) -> FAILED
+Memory Layout:
+[Start: 0, Size: 300, Allocated]
+[Start: 300, Size: 150, Allocated]
+[Start: 450, Size: 50, Free]
+[Start: 500, Size: 400, Allocated]
+[Start: 900, Size: 100, Free]
+External Fragmentation: 0.333333
+Memory Utilization: 0.85
+
+free 0
+free(0)
+Memory Layout:
+[Start: 0, Size: 300, Free]
+[Start: 300, Size: 150, Allocated]
+[Start: 450, Size: 50, Free]
+[Start: 500, Size: 400, Allocated]
+[Start: 900, Size: 100, Free]
+External Fragmentation: 0.333333
+Memory Utilization: 0.55

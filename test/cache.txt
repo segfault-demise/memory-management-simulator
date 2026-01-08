@@ -1,0 +1,38 @@
+In the same way as done in the memory.txt file i have demonstrated  the detailed and interactive part of the input and output of the cache part which includes the cache strategy and the cache and decache of the memory through a test case.
+
+
+--------------------------------
+STEP 5 : CACHE (L1)
+--------------------------------
+Enter number of cache commands: 8
+Commands:
+INIT_CACHE <cacheSize> <blockSize> <associativity>
+CACHE_ACCESS <address>
+CACHE_STATS
+
+INIT_CACHE 12 64 3
+
+Cache Initialized
+Cache Size      : 12
+Block Size      : 64
+Associativity   : 3
+
+CACHE_ACCESS 128
+Address 128 -> L1 MISS
+CACHE_ACCESS 256
+Address 256 -> L1 MISS
+CACHE_ACCESS 128
+Address 128 -> L1 HIT
+CACHE_ACCESS 512
+Address 512 -> L1 MISS
+CACHE_ACCESS 256
+Address 256 -> L1 HIT
+CACHE_ACCESS 768
+Address 768 -> L1 MISS
+CACHE_STATS
+
+L1 Cache Statistics:
+Hits      : 2
+Misses    : 4
+Hit Ratio : 0.333333
+

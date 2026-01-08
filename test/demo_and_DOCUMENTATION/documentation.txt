@@ -1,0 +1,4 @@
+In this documentation i have explained the project memory management simulator through a documentation file.
+
+link:
+https://drive.google.com/drive/folders/13Zb9IU5jWR9GmifspHmW4UB70zmsq0Et?usp=sharing

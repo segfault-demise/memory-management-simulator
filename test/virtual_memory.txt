@@ -1,0 +1,29 @@
+Similar to the memory.txt file i have demonstrated the detailed and interactive part of the input and output of the virtual memory part which includes the virtual memory strategy and the virtual memory and devirtual memory of the memory through a test case.
+
+
+
+--------------------------------
+STEP 6 : VIRTUAL MEMORY
+--------------------------------
+Enter page size, number of virtual pages, number of physical frames: 64 12 3
+Enter number of virtual addresses: 8
+Enter virtual addresses:
+10
+VA 10 -> PA 10
+70
+VA 70 -> PA 70
+130
+VA 130 -> PA 130
+10
+VA 10 -> PA 10
+200
+VA 200 -> PA 72
+70
+VA 70 -> PA 134
+260
+VA 260 -> PA 4
+10
+VA 10 -> PA 74
+
+Page Faults    : 7
+Page Fault Rate: 0.875

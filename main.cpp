@@ -1,62 +1,155 @@
 #include <iostream>
-#include "include/vmm/VirtualMemoryManager.h"
+#include <string>
+
+#include "include/memory/PhysicalMemory.h"
 #include "include/cache/SetAssociativeCache.h"
+#include "include/vmm/VirtualMemoryManager.h"
 
 using namespace std;
 
-int main() {
-    // -------- Virtual Memory Configuration --------
-    VirtualMemoryManager vmm(64,  // page size (bytes)
-                             16,  // number of virtual pages
-                             6    // number of physical frames
-    );
+/* ---------------- STEP 1–4 ---------------- */
+void demoAllocator() {
+    cout << "\n--------------------------------\n";
+    cout << "STEP 1 TO 4 : MEMORY ALLOCATION\n";
+    cout << "--------------------------------\n";
 
-    // -------- Cache Hierarchy --------
-    // L1 Cache: smaller, faster
-    SetAssociativeCache L1(6,   // total blocks
-                           64,  // block size
-                           2    // 2-way set associative
-    );
+    int totalMemory;
+    cout << "Enter total memory size: ";
+    cin >> totalMemory;
 
-    // L2 Cache: larger, slower
-    SetAssociativeCache L2(12,  // total blocks
-                           64,  // block size
-                           3    // 3-way set associative
-    );
+    string strategy;
+    cout << "Enter allocation strategy (FIRST_FIT / BEST_FIT / WORST_FIT): ";
+    cin >> strategy;
 
-    // Virtual address trace
-    int virtualAddresses[] = {20, 80,  140, 220, 20,  300,
-                              80, 400, 140, 20,  500, 300};
+    AllocationStrategy strat;
+    if (strategy == "FIRST_FIT")
+        strat = FIRST_FIT;
+    else if (strategy == "BEST_FIT")
+        strat = BEST_FIT;
+    else
+        strat = WORST_FIT;
 
-    int n = sizeof(virtualAddresses) / sizeof(int);
+    PhysicalMemory mem(totalMemory, strat);
 
-    for (int i = 0; i < n; i++) {
-        int va = virtualAddresses[i];
+    int ops;
+    cout << "Enter number of operations: ";
+    cin >> ops;
 
-        // Virtual -> Physical address translation
-        int pa = vmm.translate(va);
+    cout << "Enter operations (malloc <size> / free <address>):\n";
 
-        // -------- Cache Access --------
-        bool hitL1 = L1.access(pa);
+    for (int i = 0; i < ops; i++) {
+        string command;
+        cin >> command;
 
-        if (!hitL1) {
-            bool hitL2 = L2.access(pa);
+        if (command == "malloc") {
+            int sz;
+            cin >> sz;
+            int addr = mem.allocate(sz);
 
-            // Promote to L1 on L2 hit or miss
-            L1.access(pa);
+            if (addr == -1)
+                cout << "malloc(" << sz << ") -> FAILED\n";
+            else
+                cout << "malloc(" << sz << ") -> address " << addr << "\n";
+        } else if (command == "free") {
+            int addr;
+            cin >> addr;
+            mem.freeBlock(addr);
+            cout << "free(" << addr << ")\n";
         }
 
-        cout << "VA " << va << " -> PA " << pa << endl;
+        mem.dumpMemory();
+        cout << "External Fragmentation: " << mem.getExternalFragmentation()
+             << "\n";
+        cout << "Memory Utilization: " << mem.getMemoryUtilization() << "\n\n";
+    }
+}
+
+/* ---------------- STEP 5 ---------------- */
+void demoCache() {
+    cout << "\n--------------------------------\n";
+    cout << "STEP 5 : CACHE (L1)\n";
+    cout << "--------------------------------\n";
+
+    SetAssociativeCache* L1 = nullptr;
+
+    int commands;
+    cout << "Enter number of cache commands: ";
+    cin >> commands;
+
+    cout << "Commands:\n";
+    cout << "INIT_CACHE <cacheSize> <blockSize> <associativity>\n";
+    cout << "CACHE_ACCESS <address>\n";
+    cout << "CACHE_STATS\n\n";
+
+    for (int i = 0; i < commands; i++) {
+        string cmd;
+        cin >> cmd;
+
+        if (cmd == "INIT_CACHE") {
+            int cacheSize, blockSize, assoc;
+            cin >> cacheSize >> blockSize >> assoc;
+
+            delete L1;
+            L1 = new SetAssociativeCache(cacheSize, blockSize, assoc);
+
+            cout << "\nCache Initialized\n";
+            cout << "Cache Size      : " << cacheSize << "\n";
+            cout << "Block Size      : " << blockSize << "\n";
+            cout << "Associativity   : " << assoc << "\n\n";
+        } else if (cmd == "CACHE_ACCESS") {
+            int addr;
+            cin >> addr;
+
+            bool hit = L1->access(addr);
+
+            if (hit)
+                cout << "Address " << addr << " -> L1 HIT\n";
+            else
+                cout << "Address " << addr << " -> L1 MISS\n";
+        } else if (cmd == "CACHE_STATS") {
+            cout << "\nL1 Cache Statistics:\n";
+            cout << "Hits      : " << L1->getHits() << "\n";
+            cout << "Misses    : " << L1->getMisses() << "\n";
+            cout << "Hit Ratio : " << L1->getHitRatio() << "\n\n";
+        }
     }
 
-    // -------- Metrics --------
-    cout << "\n--- Metrics ---\n";
+    delete L1;
+}
 
-    cout << "Page Faults: " << vmm.getPageFaults() << endl;
-    cout << "Page Fault Rate: " << vmm.getPageFaultRate() << endl;
+/* ---------------- STEP 6 ---------------- */
+void demoVirtualMemory() {
+    cout << "\n--------------------------------\n";
+    cout << "STEP 6 : VIRTUAL MEMORY\n";
+    cout << "--------------------------------\n";
 
-    cout << "\nL1 Hit Ratio: " << L1.getHitRatio() << endl;
-    cout << "L2 Hit Ratio: " << L2.getHitRatio() << endl;
+    int pageSize, virtualPages, physicalFrames;
+    cout << "Enter page size, number of virtual pages, number of physical "
+            "frames: ";
+    cin >> pageSize >> virtualPages >> physicalFrames;
 
+    VirtualMemoryManager vmm(pageSize, virtualPages, physicalFrames);
+
+    int n;
+    cout << "Enter number of virtual addresses: ";
+    cin >> n;
+
+    cout << "Enter virtual addresses:\n";
+
+    for (int i = 0; i < n; i++) {
+        int va;
+        cin >> va;
+        int pa = vmm.translate(va);
+        cout << "VA " << va << " -> PA " << pa << "\n";
+    }
+
+    cout << "\nPage Faults    : " << vmm.getPageFaults() << "\n";
+    cout << "Page Fault Rate: " << vmm.getPageFaultRate() << "\n";
+}
+
+int main() {
+    demoAllocator();
+    demoCache();
+    demoVirtualMemory();
     return 0;
 }
